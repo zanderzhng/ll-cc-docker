@@ -36,11 +36,15 @@ RUN git config --global http.sslVerify false && git config --global http.postBuf
     cd /opt/noVNC/utils && git clone https://github.com/novnc/websockify.git && \
     cp /opt/noVNC/vnc.html /opt/noVNC/index.html
 
-# https://dldir1.qq.com/qqfile/qq/QQNT/Linux/QQ_3.2.7_240410_amd64_01.deb
+# 安装最新的QQ
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
-    curl -o /root/linuxqq.deb https://dldir1.qq.com/qqfile/qq/QQNT/Linux/QQ_3.2.7_240428_${arch}_01.deb
-RUN chmod +x /root/linuxqq.deb && apt install -y /root/linuxqq.deb
-RUN rm /root/linuxqq.deb
+    curl -o /tmp/linuxqq.deb $( \
+    curl 'https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/linuxQQDownload.js' | \
+    sed 's/,/,\n/g' | \
+    sed -rn 's/^.*x64DownloadUrl.*(https:.*.deb).*$/\1/p' \
+    )
+RUN chmod +x /tmp/linuxqq.deb && apt install -y /tmp/linuxqq.deb
+RUN rm /tmp/linuxqq.deb
 
 # 下载LiteLoader
 RUN version=$(curl -Ls "https://api.github.com/repos/LiteLoaderQQNT/LiteLoaderQQNT/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') && \
